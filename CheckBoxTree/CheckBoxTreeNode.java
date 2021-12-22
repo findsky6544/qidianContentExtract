@@ -4,6 +4,10 @@ import java.util.Vector;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class CheckBoxTreeNode extends DefaultMutableTreeNode {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1373472246138161472L;
 	public boolean isSelected;
 	
 	public boolean isSelected() {

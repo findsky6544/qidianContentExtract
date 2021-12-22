@@ -11,6 +11,10 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.tree.TreeCellRenderer;
 
 public class CheckBoxTreeCellRenderer extends JPanel implements TreeCellRenderer {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2208685801460410443L;
 	protected JCheckBox check;
 	protected CheckBoxTreeLabel label;
 	

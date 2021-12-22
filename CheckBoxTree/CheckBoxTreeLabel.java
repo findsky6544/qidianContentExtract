@@ -9,6 +9,10 @@ import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
 
 public class CheckBoxTreeLabel extends JLabel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7986805075641561520L;
 	private boolean isSelected;
 	private boolean hasFocus;
 	

@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 import com.google.gson.Gson;
 
-import Entity.Config;
+import Entity.Menu.Config;
 import main.DeleteFrame;
 
 public class ConfigChangeListener implements ActionListener {
@@ -18,9 +18,10 @@ public class ConfigChangeListener implements ActionListener {
 		// TODO Auto-generated method stub
 
 		File configFile = new File("config.txt");
+		Scanner input = null;
 		try {
 			Gson gson = new Gson();
-			Scanner input = new Scanner(configFile);
+			input = new Scanner(configFile);
 			Config config = new Config(DeleteFrame.addVolumeCheckBox.isSelected(),DeleteFrame.addOnlyFirstRadioButton.isSelected()?"addOnlyFirst":DeleteFrame.addEveryCharacterRadioButton.isSelected()?"addEveryCharacter":"");
 			String configJson = gson.toJson(config);
 			PrintWriter writer = new PrintWriter(configFile);
@@ -29,6 +30,11 @@ public class ConfigChangeListener implements ActionListener {
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+		}
+		finally {
+			if(input != null) {
+				input.close();
+			}
 		}
 	}
 }

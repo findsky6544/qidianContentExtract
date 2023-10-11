@@ -33,36 +33,32 @@ import javax.swing.tree.TreeModel;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.teamdev.jxbrowser.chromium.Browser;
+import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 
 import CheckBoxTree.CheckBoxTreeCellRenderer;
 import CheckBoxTree.CheckBoxTreeNode;
 import CheckBoxTree.CheckBoxTreeNodeSelectionListener;
-import Debug.Log;
-import Entity.Book;
-import Entity.Config;
+import Entity.Menu.Book;
+import Entity.Menu.Config;
 import Listener.ComboBoxChangeListener;
 import Listener.ConfigChangeListener;
 import Listener.ExtractListener;
 import Listener.GetMenuListener;
-import Listener.LoginListener;
 
 public class DeleteFrame extends JFrame {
-	public JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.NORTH);
-	//登录
-	public static JPanel loginPanel = new JPanel();
-	public static JPanel loginInputPanel = new JPanel();
-	public static JLabel useridInputLabel = new JLabel("ywguid");
-	public static JTextField useridField = new JTextField();
-	public static JLabel passwordInputLabel = new JLabel("ywkey");
-	public static JTextField passwordField = new JTextField();
-	public static JButton loginButton = new JButton("保存");
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -192818697949765761L;
+	public static JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.NORTH);
 	//目录
 	public static JPanel extractPanel = new JPanel(new BorderLayout());
 	public static JPanel extractControlPanel = new JPanel(new BorderLayout());
 	public static JPanel extractControlInputPanel = new JPanel(new GridLayout());
 	public static JPanel bookNamePanel = new JPanel(new BorderLayout());
 	public static JLabel bookNameLabel = new JLabel("书名：");
-	public static JComboBox bookNameComboBox = new JComboBox();
+	public static JComboBox<String> bookNameComboBox = new JComboBox<String>();
 	public static JPanel urlPanel = new JPanel(new BorderLayout());
 	public static JLabel bookIdLabel = new JLabel("书籍ID：");
 	public static JTextField bookUrlField = new JTextField();
@@ -91,6 +87,8 @@ public class DeleteFrame extends JFrame {
 	
 	
 	public static List<Book> books = new ArrayList<Book>();
+	
+	public static Browser browser;
 	Gson gson = new Gson();
 
 	public DeleteFrame() {
@@ -98,26 +96,15 @@ public class DeleteFrame extends JFrame {
 		setLayout(new BorderLayout());
 		this.setSize(800, 500);
 		//登录选项卡
-		loginInputPanel.setLayout(null);
-		useridInputLabel.setBounds(50,20, 50, 30);
-		loginInputPanel.add(useridInputLabel);
-		passwordInputLabel.setBounds(50,60, 50, 30);
-		loginInputPanel.add(passwordInputLabel);
-		useridField.setBounds(110,20, 150, 30);
-		loginInputPanel.add(useridField);
-		passwordField.setBounds(110,60, 150, 30);
-		loginInputPanel.add(passwordField);
-		loginButton.setBounds(120,100, 100, 30);
-		loginButton.addActionListener(new LoginListener());
-		loginInputPanel.add(loginButton);
 		
-		loginInputPanel.setSize(360, 250);
-		loginInputPanel.setBounds((this.getWidth()-loginInputPanel.getWidth())/2, (this.getHeight()-loginInputPanel.getHeight())/2, loginInputPanel.getWidth(), loginInputPanel.getHeight());
-	
-		loginPanel.setLayout(null);
-		loginPanel.add(loginInputPanel);
+		browser = new Browser();
+		BrowserView browserView = new BrowserView(browser);
+		DeleteFrame.browser.getContext().getNetworkService().setNetworkDelegate(new XymNetworkDelegateTranslate());
+		JPanel pagePanel = new JPanel(new BorderLayout());
+		pagePanel.add(browserView, BorderLayout.CENTER);
+		browser.loadURL("https://www.qidian.com/");
+		tabPanel.add("登录",pagePanel);
 		
-		tabPanel.add("登录",loginPanel);
 		
 		//提取选项卡
 		bookNamePanel.add(bookNameLabel,"West");
@@ -185,7 +172,7 @@ public class DeleteFrame extends JFrame {
 		
 		useInstructionLabel.setText(
 				"<html><body>"
-			  + "1.登录起点，找到cookie中的ywguid和ywkey，填入登录界面并保存（如果只提取免费章节，可跳过此步骤）<br/>"
+			  + "1.登录起点（如果只提取免费章节，可跳过此步骤）<br/>"
 			  + "2.找到想提取的书籍的ID（即书籍介绍页网址最后的一串数字），填入提取页，然后获取目录<br/>"
 			  + "3.选择想提取的章节，点击提取按钮，等待完成<br/>"
 			  + "4.在软件根目录下即可获得提取出的文本。"
@@ -196,13 +183,11 @@ public class DeleteFrame extends JFrame {
 		
 		add(tabPanel,"Center");
 		try {
-			readUserInfo();
 			readBookList();
 			readConfig();
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-			Log.error(e1.toString());
 		}
 		
 		this.addComponentListener(new ComponentListener() {
@@ -223,7 +208,6 @@ public class DeleteFrame extends JFrame {
 			public void componentResized(ComponentEvent arg0) {
 				// TODO Auto-generated method stub
 
-				loginInputPanel.setBounds((arg0.getComponent().getWidth()-loginInputPanel.getWidth())/2, (arg0.getComponent().getHeight()-loginInputPanel.getHeight())/2, loginInputPanel.getWidth(), loginInputPanel.getHeight());
 			}
 
 			@Override
@@ -233,24 +217,6 @@ public class DeleteFrame extends JFrame {
 			}
 			
 		});
-	}
-	
-	public void readUserInfo() throws FileNotFoundException {
-		// 读取用户信息
-		File userInfoFile = new File("userInfo.txt");
-		if (userInfoFile.exists()) {
-			Scanner input = new Scanner(userInfoFile);
-			useridField.setText(input.next());
-			passwordField.setText(input.next());
-			ExtractListener.cookies.put("ywguid", useridField.getText());
-			ExtractListener.cookies.put("ywkey", passwordField.getText());
-		} else {
-			// 若不存在卷名txt则写入
-			PrintWriter writer = new PrintWriter(userInfoFile);
-			String title = "";
-			writer.print(title);
-			writer.close();
-		}
 	}
 	
 	public void readBookList() throws FileNotFoundException {
@@ -267,6 +233,7 @@ public class DeleteFrame extends JFrame {
 			for(int i = 0;i < books.size();i++) {
 				bookNameComboBox.addItem(books.get(i).name);
 			}
+			input.close();
 		} else {
 			// 若不存在卷名txt则写入
 			PrintWriter writer = new PrintWriter(bookListFile);
@@ -282,13 +249,14 @@ public class DeleteFrame extends JFrame {
 		if (configFile.exists()) {
 			Scanner input = new Scanner(configFile);
 			Config config = gson.fromJson(input.next(),Config.class);
-			this.addVolumeCheckBox.setSelected(config.isAddVolumeName);
+			addVolumeCheckBox.setSelected(config.isAddVolumeName);
 			if(config.addVolumeNameWhere.equals("addOnlyFirst")) {
-				this.addOnlyFirstRadioButton.setSelected(true);
+				addOnlyFirstRadioButton.setSelected(true);
 			}
 			else if(config.addVolumeNameWhere.equals("addEveryCharacter")) {
-				this.addEveryCharacterRadioButton.setSelected(true);
+				addEveryCharacterRadioButton.setSelected(true);
 			}
+			input.close();
 		} else {
 			// 若不存在设置txt则写入
 			PrintWriter writer = new PrintWriter(configFile);

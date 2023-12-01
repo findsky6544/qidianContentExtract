@@ -79,6 +79,7 @@ public class ExtractListener implements ActionListener {
 				for(Object chapterNodeObj:volumeNode.getChildren()) {
 					ChapterNode chapterNode = (ChapterNode)chapterNodeObj;
 					if(chapterNode.isSelected) {
+						DeleteFrame.progressBar.setString("正在提取:"+volumeNode.name+":"+chapterNode.name+"   已完成"+index+"/"+chapterCount);
 						Thread.sleep((long) (Math.random()*1000+1000));
 						if(DeleteFrame.addVolumeCheckBox.isSelected() && DeleteFrame.addEveryCharacterRadioButton.isSelected()) {
 							DeleteFrame.outputArea.append(volumeNode.name+" ");
@@ -87,16 +88,14 @@ public class ExtractListener implements ActionListener {
 						try {
 						String url2 = "https://www.qidian.com/chapter/"+DeleteFrame.bookUrlField.getText()+"/"+chapterNode.url+"/";
 						DeleteFrame.browser.loadURL(url2);
-
 		 				Robot r=new Robot(); 
-		 				r.delay(3000); 
+		 				r.delay(10000); 
 						DOMDocument dom = DeleteFrame.browser.getDocument();
 						//System.out.println(dom.getDocumentElement().getInnerHTML());
 						String chapterTitle = dom.findElement(By.className("title text-1.3em")).getInnerHTML();
 						chapterTitle = chapterTitle.substring(0, chapterTitle.indexOf('<'));
 						System.out.println(chapterTitle);
 						writer.print(chapterTitle+"\r\n");
-						DeleteFrame.progressBar.setString("正在提取:"+volumeNode.name+":"+chapterTitle+"   已完成"+index+"/"+chapterCount);
 						String chapterContent = dom.findElement(By.tagName("main")).getInnerHTML();
 						//chapterContent = chapterContent.replaceAll(" ","\r\n\r\n");
 						chapterContent = chapterContent.replaceAll("<p data-type=\"2\">","\r\n\r\n");
@@ -111,6 +110,9 @@ public class ExtractListener implements ActionListener {
 						System.out.println(chapterContent);
 						DeleteFrame.progressBar.setString("正在提取:"+volumeNode.name+":"+chapterTitle+"   已完成"+(index+1)+"/"+chapterCount);
 						 DeleteFrame.progressBar.setValue(++index);
+
+			 				//Robot r=new Robot(); 
+			 				//r.delay(10000); 
 						}
 						catch(Exception ex) {
 							ex.printStackTrace();

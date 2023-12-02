@@ -3,6 +3,9 @@ import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,6 +36,8 @@ public class ExtractListener implements ActionListener {
 				bookFile.createNewFile();
 			}
 			writer = new PrintWriter(bookFile);
+			OutputStream os = new FileOutputStream(bookFile);
+			writer = new PrintWriter(new OutputStreamWriter(os, "UTF-8"));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
